@@ -2,15 +2,100 @@
 *{
     margin: 0px;
     padding: 0px;
-    box-sizing: border-box;     
+    box-sizing: border-box;    
+    /* border: 1px solid purple;  */
 }
 
-.container {
-    height: 100vh;
-    width: 100vw;
-}
-
-.container {
+/* outer container of whole site */
+.content{
     display: flex;
+    height: 98vh;
+    flex-direction: column;
+    align-items: end;
+    padding: 10px;
+    justify-content: space-between
+}
+
+/* side container class with both top divs */
+.container {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
     align-content: center;
+    background-color: #333232;
+    padding: 5px;
+}
+
+/* title to each info div which can toggle rest of info on or off */
+.div-title{
+    padding: 5px;
+    background-color: #060606;
+    font-family: "Roboto Mono", monospace;
+    color: white;
+    font-weight: 100;
+}
+
+/* div with form and list (top right of screen) */
+.input-info {
+    width: 100%;
+    /* border: 1px solid red; */
+    display: flex;
+    margin: 5px 0px;
+    /* padding: 5px; */
+    justify-content: space-between;
+}
+
+input[type=text] {
+    width: 100%;
+    padding: 0px 5px;
+    box-sizing: border-box;
+    background-color: #333232;
+    border: 2px solid #060606;
+    color: white;
+    text-decoration: none;
+    font-family: "Roboto Mono", monospace;
+    font-size: 20px;
+  }
+
+button{
+    background-color: #333232;
+    border: 2px solid #060606;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-family: "Roboto Mono", monospace;
+    font-size: 20px;
+    width: 30px;
+}
+
+#frm1{
+    height: 30%;
+}
+
+/* smaller container list of all stops (bottom half of first .container) */
+#locations{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-around; */
+    height: 20vh;
+    padding: 5px;
+}
+
+/* smaller container with plain text in bottom right of screen */
+#dist {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 15vh;
+    /* border: 1px solid blue; */
+    padding: 5px;
+}
+
+/* general styling for paragraphs */
+p {
+    color: white;
+    font-family: "Roboto Mono", monospace;
+    font-weight: 200;
+    font-size: 12px;
 }

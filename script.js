@@ -1,6 +1,13 @@
+// only one input field
 
 let lat = [];
 let lon = [];
+let locCount = 3;
+let kmDist;
+let totalDistance = 0;
+
+let stopCodes = []; // Array to store all stop codes
+
 const earthR = 6371;
 
 // Define a function to fetch CSV data and convert it to JSON
@@ -9,7 +16,7 @@ function fetchAndConvertCsvToJson() {
 
     return fetch(apiUrl)
         .then(response => {
-            if (!response.ok) {// if the response finds an error, return the error 
+            if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.text(); // Fetch response as text
@@ -21,8 +28,8 @@ function fetchAndConvertCsvToJson() {
 
             // Loop through each line
             lines.forEach(line => {
-                // Split each line into fields
-                const fields = line.trim().split(',');
+                // Split each line into fields, handling potential quotation marks
+                const fields = line.split(',').map(field => field.replace(/"/g, ''));
 
                 // Construct JSON object with specific fields
                 const airport = {
@@ -48,113 +55,92 @@ function fetchAndConvertCsvToJson() {
         });
 }
 
-// Call the function when the page finishes loading
-window.onload = function() {
-    fetchAndConvertCsvToJson()
-        .then(jsonData => {
-            // Once the JSON data is fetched, call displayLocation with the data
-            displayLocation1(jsonData);
-            displayLocation2(jsonData);
-            calcDist();
-        });
-};
-
-// Display Location 1 coordinates, and name of a random airport
-function displayLocation1(jsonData) {
-    const airportList = document.getElementById('container');
+// Display Location coordinates and details based on airport code
+function displayLocation(jsonData, stopCode) {
+    const locationsContainer = document.getElementById("locations");
     const airportItem = document.createElement('div');
-    const randIndex = Math.floor(Math.random() * jsonData.length); // Generate random index within jsonData array
+    const stopAirport = jsonData.find(airport => airport.code === stopCode);
 
-    const airport = jsonData[randIndex]; // Select a random airport from jsonData array
+    if (stopAirport) { // Check if airport is found
+        airportItem.innerHTML = `
+            <p>${stopAirport.code} - ${stopAirport.city}, ${stopAirport.country}</p>
+        `;
 
-    airportItem.innerHTML = `
-        <h2>${airport.name}</h2>
-        <p>Name: ${airport.name}</p>
-        <p>City: ${airport.city}</p>
-        <p>Country: ${airport.country}</p>
-        <p>Code: ${airport.code}</p>
-        <p>Latitude: ${airport.latitude}</p>
-        <p>Longitude: ${airport.longitude}</p>
-    `;
+        lat.push(stopAirport.latitude);
+        lon.push(stopAirport.longitude);
 
-    lat.push(airport.latitude);
-    lon.push(airport.longitude);
+        locationsContainer.appendChild(airportItem);
 
-    airportList.appendChild(airportItem);
-}
-
-// Display Location2 coordinates, and name of a random airport
-function displayLocation2(jsonData) {
-    const airportList = document.getElementById('container');
-    const airportItem = document.createElement('div');
-    const randIndex = Math.floor(Math.random() * jsonData.length); // Generate random index within jsonData array
-
-    const airport = jsonData[randIndex]; // Select a random airport from jsonData array
-
-    airportItem.innerHTML = `
-        <h2>${airport.name}</h2>
-        <p>Name: ${airport.name}</p>
-        <p>City: ${airport.city}</p>
-        <p>Country: ${airport.country}</p>
-        <p>Code: ${airport.code}</p>
-        <p>Latitude: ${airport.latitude}</p>
-        <p>Longitude: ${airport.longitude}</p>
-    `;
-    // add latitude and longitude coordinated to each array
-    lat.push(airport.latitude);
-    lon.push(airport.longitude);
-
-    airportList.appendChild(airportItem);
+        // Update distance and CO2 emissions
+        calcDist();
+        co2Emissions();
+    } else {
+        console.error(`Airport ${stopCode} not found`);
+    }
 }
 
 // Calculate distance between lat and long of two points:
 function degreesToRadians(degrees) {
     return degrees * Math.PI / 180;
-  }
-
-  // source: https://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
-// =acos(sin(lat1)*sin(lat2)+cos(lat1)*cos(lat2)*cos(lon2-lon1))*6371 (6371 is Earth radius in km.)
-function calcDist() {
-    const kmDist = document.getElementById("dist");
-
-    // Define the Earth's radius in kilometers
-    const earthR = 6371;
-
-    let distLat = degreesToRadians(lat[0] - lat[1]);
-    let distLon = degreesToRadians(lon[0] - lon[1]);
-
-    let lat1 = degreesToRadians(lat[0]);
-    let lat2 = degreesToRadians(lat[1]);
-
-    let a = Math.sin(distLat/2) * Math.sin(distLat/2) + Math.sin(distLon/2) * Math.sin(distLon/2) * Math.cos(lat1) * Math.cos(lat2);
-    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-
-    let displayDist = earthR * c;
-
-    // Update the HTML content of kmDist with the calculated distance
-    kmDist.innerHTML = `
-        <p>Distance: ${displayDist.toFixed(2)} km</p>`;
-
-    console.log(lat);
 }
 
+// Calculate total distance by running distance calculation between every pair of stops and adding all distances together
+function calcDist() {
+    totalDistance = 0;
+    for (let i = 0; i < lat.length - 1; i++) {
+        let distLat = degreesToRadians(lat[i] - lat[i + 1]);
+        let distLon = degreesToRadians(lon[i] - lon[i + 1]);
+
+        let lat1 = degreesToRadians(lat[i]);
+        let lat2 = degreesToRadians(lat[i + 1]);
+
+        let a = Math.sin(distLat / 2) * Math.sin(distLat / 2) + Math.sin(distLon / 2) * Math.sin(distLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        totalDistance += earthR * c;
+    }
+
+    // Update the HTML content of kmDist with the calculated total distance
+    kmDist.innerHTML = `
+        <p>Total Distance: ${totalDistance.toFixed(2)} km</p>`;
+}
+
+// Calculate CO2 emissions based on distance traveled
+function co2Emissions() {
+    const CO = Math.floor(totalDistance * 0.115);
+    const aroundEarth = totalDistance / 40075;
+
+    // Update the HTML content of kmDist with the calculated distance and CO2 emissions
+    kmDist.innerHTML += `
+        <p>CO2 Emissions: ${CO} kg</p>
+        <p>Times Around the Earth: ${aroundEarth}</p>`;
+}
+
+// Store lat and lon of airports submitted when button is clicked
+document.addEventListener("DOMContentLoaded", function () {
+    // Store lat and lon of airports submitted when button is clicked
+    let addStopBtn = document.getElementById("add-stop");
+    kmDist = document.getElementById("dist");
+
+    addStopBtn.addEventListener("click", () => {
+        let stopCodeInput = document.getElementById("stop-code");
+        let stopCode = stopCodeInput.value.trim();
+
+        if (stopCode !== "") {
+            fetchAndConvertCsvToJson()
+                .then(jsonData => {
+                    displayLocation(jsonData, stopCode);
+                });
+
+            // Clear input field
+            stopCodeInput.value = "";
+        }
+    });
+});
 
 
 
 
 
-// function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
-//     var earthRadiusKm = 6371;
-  
-//     var dLat = degreesToRadians(lat2-lat1);
-//     var dLon = degreesToRadians(lon2-lon1);
-  
-//     lat1 = degreesToRadians(lat1);
-//     lat2 = degreesToRadians(lat2);
-  
-//     var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-//             Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
-//     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-//     return earthRadiusKm * c;
-//   }
+
 
