@@ -80,6 +80,11 @@ button{
     width: 30px;
 }
 
+button:hover{
+    background-color: #060606;
+    cursor:pointer;
+}
+
 #frm1{
     height: 30%;
 }

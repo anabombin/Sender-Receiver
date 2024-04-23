@@ -4,9 +4,8 @@ let lon = [];
 let locCount = 3;
 let kmDist;
 let totalDistance = 0;
+let distances = []; // Array to store distances between points
 var canvas;
-
-let stopCodes = []; // Array to store all stop codes
 
 const earthR = 6371;
 
@@ -21,8 +20,6 @@ function setup() {
 }
 
 function draw() {
-    
-    
     //Grid lines
     stroke(0, 0, 0, 50);
     for (let i=1; i<windowWidth; i+=50){
@@ -32,7 +29,6 @@ function draw() {
         line(0, i, windowWidth, i);
     }
 
-    
     for (let i = 1; i < lat.length; i++) {
         let x1 = map(lon[i - 1], -180, 180, 0, windowWidth);
         let y1 = map(lat[i - 1], 90, -90, 0, windowHeight);
@@ -41,14 +37,13 @@ function draw() {
         line(x1, y1, x2, y2);
     }
     noStroke();
-    
-    // for (let i=0; i<lat.length; i++){
-    //   fill(co[i], 100, 100, 10);
-    //   ellipse(map(lat[i], -90, 90, 0 ,width), map(lon[i], -180, 180, 0 ,height), map(co[i], 0.31, 1800, 5 ,200));
-    // }
-    
+    for (let i=1; i<lat.length; i++){
+        let x1 = map(lon[i], -180, 180, 0, windowWidth);
+        let y1 = map(lat[i], 90, -90, 0, windowHeight);
+        fill(distances[i-1]*0.115, 100, 100, 10);
+        ellipse(x1, y1, map(distances[i-1]*0.115, 0.31, 1800, 10 ,400));
+      }
 }
-
 
 // Define a function to fetch CSV data and convert it to JSON
 function fetchAndConvertCsvToJson() {
@@ -127,6 +122,7 @@ function degreesToRadians(degrees) {
 // Calculate total distance by running distance calculation between every pair of stops and adding all distances together
 function calcDist() {
     totalDistance = 0;
+    distances = [];
     for (let i = 0; i < lat.length - 1; i++) {
         let distLat = degreesToRadians(lat[i] - lat[i + 1]);
         let distLon = degreesToRadians(lon[i] - lon[i + 1]);
@@ -137,8 +133,11 @@ function calcDist() {
         let a = Math.sin(distLat / 2) * Math.sin(distLat / 2) + Math.sin(distLon / 2) * Math.sin(distLon / 2) * Math.cos(lat1) * Math.cos(lat2);
         let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        totalDistance += earthR * c;
+        let distance = earthR * c;
+        totalDistance += distance;
+        distances.push(distance); // Store the distance
     }
+    console.log(distances);
 
     // Update the HTML content of kmDist with the calculated total distance
     kmDist.innerHTML = `
@@ -165,7 +164,6 @@ document.addEventListener("DOMContentLoaded", function () {
     addStopBtn.addEventListener("click", () => {
         let stopCodeInput = document.getElementById("stop-code");
         let stopCode = stopCodeInput.value.trim();
-        console.log(lat);
 
         if (stopCode !== "") {
             fetchAndConvertCsvToJson()
@@ -178,6 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
 
 
 
