@@ -1,14 +1,54 @@
-// only one input field
-
+//Global variables & arrays
 let lat = [];
 let lon = [];
 let locCount = 3;
 let kmDist;
 let totalDistance = 0;
+var canvas;
 
 let stopCodes = []; // Array to store all stop codes
 
 const earthR = 6371;
+
+// p5.js canvas
+function setup() {
+    canvas = createCanvas(windowWidth, windowHeight);
+    canvas.position(0,0);
+    canvas.style('z-index', '-1');
+    colorMode(HSB, 1800, 100, 100, 50);
+    fetchAndConvertCsvToJson(); 
+    background(220, 100, 100, 0);
+}
+
+function draw() {
+    
+    
+    //Grid lines
+    stroke(0, 0, 0, 50);
+    for (let i=1; i<windowWidth; i+=50){
+        line(i, 0, i, windowHeight);
+    }
+    for (let i=1; i<windowHeight; i+=50){
+        line(0, i, windowWidth, i);
+    }
+
+    
+    for (let i = 1; i < lat.length; i++) {
+        let x1 = map(lon[i - 1], -180, 180, 0, windowWidth);
+        let y1 = map(lat[i - 1], 90, -90, 0, windowHeight);
+        let x2 = map(lon[i], -180, 180, 0, windowWidth);
+        let y2 = map(lat[i], 90, -90, 0, windowHeight);
+        line(x1, y1, x2, y2);
+    }
+    noStroke();
+    
+    // for (let i=0; i<lat.length; i++){
+    //   fill(co[i], 100, 100, 10);
+    //   ellipse(map(lat[i], -90, 90, 0 ,width), map(lon[i], -180, 180, 0 ,height), map(co[i], 0.31, 1800, 5 ,200));
+    // }
+    
+}
+
 
 // Define a function to fetch CSV data and convert it to JSON
 function fetchAndConvertCsvToJson() {
@@ -125,6 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addStopBtn.addEventListener("click", () => {
         let stopCodeInput = document.getElementById("stop-code");
         let stopCode = stopCodeInput.value.trim();
+        console.log(lat);
 
         if (stopCode !== "") {
             fetchAndConvertCsvToJson()
@@ -137,6 +178,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+
 
 
 

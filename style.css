@@ -6,6 +6,16 @@
     /* border: 1px solid purple;  */
 }
 
+.main-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1; /* Place canvas behind other elements */
+}
+canvas{
+    display: block;
+}
+
 /* outer container of whole site */
 .content{
     display: flex;
@@ -13,7 +23,8 @@
     flex-direction: column;
     align-items: end;
     padding: 10px;
-    justify-content: space-between
+    justify-content: space-between;
+    z-index: 1;
 }
 
 /* side container class with both top divs */
