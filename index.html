@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.1/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.1/addons/p5.sound.min.js"></script>
+    <script src="ink.js"></script>
     <script src="script.js"></script>  
 </head>
 <body>
@@ -22,6 +23,7 @@
         <div class="container" id="container">
             <div class="div-title">
                 <h3>Destinations</h3>
+                <h3 class="minus" id="minus-dest">-</h3>
             </div>
             <div class="input-info">
                 <form id="frm1">
@@ -30,6 +32,7 @@
                     </div>
                 </form>
                 <button id="add-stop">+</button>
+                <button id="save">Save</button>
             </div>
             <div id="locations">
                 <!-- Stops will be dynamically added here -->
@@ -38,6 +41,7 @@
         <div class="container">
             <div class="div-title">
                 <h3>Travel Record</h3>
+                <h3 class="minus" id="minus-rec">-</h3>
             </div>
             <div id="dist">
                  <!-- Distance and CO2 will be added here -->
